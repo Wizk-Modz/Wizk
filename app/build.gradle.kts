@@ -23,6 +23,32 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("wizk.keystore")
+            storePassword = "chuong"
+            keyAlias = "chuong"
+            keyPassword = "chuong"
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),"proguard-rules.pro"
+            )
+            
+            signingConfig = signingConfigs.getByName("release")
+        }
+
+        debug {
+            isMinifyEnabled = false
+        }
+    }
 }
 
 dependencies {

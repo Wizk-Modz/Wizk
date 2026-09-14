@@ -6,15 +6,20 @@ import com.wizk.app.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.textView.setText("Hello, Wizk Modz!");
+        binding.textView.setText("SetVN!");
     }
-    
+
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();

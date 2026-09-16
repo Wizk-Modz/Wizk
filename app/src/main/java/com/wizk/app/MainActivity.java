@@ -5,6 +5,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.wizk.app.databinding.ActivityMainBinding;
 
@@ -49,11 +50,15 @@ public class MainActivity extends AppCompatActivity {
         ws.setAllowContentAccess(true);
         ws.setAllowFileAccess(true);
         ws.setUseWideViewPort(true);
-        ws.setUserAgentString("Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36");
+        ws.setUserAgentString("Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Mobile Safari/537.36");
         
         binding.wizkbtn.setOnClickListener(v -> {
             webView.reload();
         });
+        
+        Greeting gng = new Greeting();
+        
+        Toast.makeText(MainActivity.this,gng.Greeting(),Toast.LENGTH_SHORT).show();
     }
     
     @Override

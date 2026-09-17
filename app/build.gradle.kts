@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.wizk.app"
     compileSdk = 36
 
     defaultConfig {
         applicationId = "com.wizk.app"
+        namespace = "com.wizk.app"
         minSdk = 30
         targetSdk = 34
         versionCode = 1
@@ -23,7 +23,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        isCoreLibraryDesugaringEnabled = true
+        isCoreLibraryDesugaringEnabled = false
     }
 
     signingConfigs {
@@ -60,4 +60,5 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
+    implementation(fileTree("libs") {include("**/*.jar","**/*.aar")})
 }

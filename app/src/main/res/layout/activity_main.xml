@@ -5,19 +5,12 @@
      xmlns:tools="http://schemas.android.com/tools"
      android:layout_height="match_parent"
      android:layout_width="match_parent"
-     tools:context=".MainActivity">
+     android:id="@+id/_coordinator">
 
-    <android.webkit.WebView
-         android:layout_height="match_parent"
-         android:layout_width="match_parent"
-         android:id="@+id/wizkwebview" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.switchmaterial.SwitchMaterial
          android:layout_height="wrap_content"
          android:layout_width="wrap_content"
-         android:layout_margin="16px"
-         android:layout_gravity="right|bottom"
-         app:srcCompat="@drawable/ic_sync"
-         android:id="@+id/wizkbtn" />
+         android:text="Switch Wizk"
+         android:id="@+id/mtsw" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

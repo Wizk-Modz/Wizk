@@ -2,25 +2,13 @@ package com.wizk.app;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.DownloadManager;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.util.Patterns;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
-import android.webkit.CookieManager;
-import android.webkit.URLUtil;
 import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -29,10 +17,11 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.wizk.app.client.BrowserWebChromeClient;
+import com.wizk.app.client.BrowserWebViewClient;
 import com.wizk.app.databinding.ActivityMainBinding;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import com.wizk.app.download.BrowserDownloadListener;
+import com.wizk.app.util.UrlUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState != null) {
             binding.webView.restoreState(savedInstanceState);
         } else {
-            loadUrlOrSearch(getString(R.string.default_homepage));
+            loadUrl(getString(R.string.default_homepage));
         }
     }
 
@@ -87,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    // Cấu hình cài đặt, sự kiện điều hướng và tính năng tải tệp của WebView
+    // Cấu hình WebView, cài đặt thuộc tính và gắn các bộ lắng nghe sự kiện
     @SuppressLint("SetJavaScriptEnabled")
     private void setupWebView() {
         WebSettings settings = binding.webView.getSettings();
@@ -103,27 +92,9 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowContentAccess(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 
-        binding.webView.setWebViewClient(new WebViewClient() {
-            // Kiểm tra và chuyển hướng liên kết web hoặc ứng dụng ngoài an toàn
+        binding.webView.setWebViewClient(new BrowserWebViewClient(this, new BrowserWebViewClient.BrowserWebCallback() {
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                Uri uri = request.getUrl();
-                String scheme = uri.getScheme();
-                if ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme)) {
-                    return false;
-                }
-                try {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-                    startActivity(intent);
-                } catch (Exception ignored) {
-                }
-                return true;
-            }
-
-            // Xử lý cập nhật giao diện khi bắt đầu tải trang web
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
+            public void onPageStarted(String url) {
                 isLoading = true;
                 binding.btnAction.setImageResource(R.drawable.ic_close);
                 binding.btnAction.setContentDescription(getString(R.string.btn_stop));
@@ -134,10 +105,8 @@ public class MainActivity extends AppCompatActivity {
                 updateNavButtons();
             }
 
-            // Xử lý cập nhật giao diện và trạng thái điều hướng khi trang web tải xong
             @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
+            public void onPageFinished(String url) {
                 isLoading = false;
                 binding.btnAction.setImageResource(R.drawable.ic_refresh);
                 binding.btnAction.setContentDescription(getString(R.string.btn_refresh));
@@ -148,69 +117,47 @@ public class MainActivity extends AppCompatActivity {
                 updateNavButtons();
             }
 
-            // Thông báo lỗi khi không thể tải trang web
             @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                super.onReceivedError(view, errorCode, description, failingUrl);
+            public void onPageError(String failingUrl) {
                 binding.progressIndicator.setVisibility(View.GONE);
                 Toast.makeText(MainActivity.this, getString(R.string.error_loading_page), Toast.LENGTH_SHORT).show();
             }
-        });
+        }));
 
-        binding.webView.setWebChromeClient(new WebChromeClient() {
-            // Đồng bộ tiến độ tải trang lên thanh hiển thị tiến trình
+        binding.webView.setWebChromeClient(new BrowserWebChromeClient(new BrowserWebChromeClient.BrowserChromeCallback() {
             @Override
-            public void onProgressChanged(WebView view, int newProgress) {
-                super.onProgressChanged(view, newProgress);
+            public void onProgressChanged(int newProgress) {
                 binding.progressIndicator.setProgressCompat(newProgress, true);
-                if (newProgress >= 100) {
-                    binding.progressIndicator.setVisibility(View.GONE);
-                } else {
-                    binding.progressIndicator.setVisibility(View.VISIBLE);
-                }
+                binding.progressIndicator.setVisibility(newProgress >= 100 ? View.GONE : View.VISIBLE);
             }
 
-            // Xử lý sự kiện mở hộp thoại chọn tệp tải lên từ trang web
             @Override
-            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-                if (MainActivity.this.filePathCallback != null) {
-                    MainActivity.this.filePathCallback.onReceiveValue(null);
+            public boolean onShowFileChooser(ValueCallback<Uri[]> callback, BrowserWebChromeClient.FileChooserParams params) {
+                if (filePathCallback != null) {
+                    filePathCallback.onReceiveValue(null);
                 }
-                MainActivity.this.filePathCallback = filePathCallback;
-
-                Intent intent = fileChooserParams.createIntent();
+                filePathCallback = callback;
                 try {
-                    fileChooserLauncher.launch(intent);
+                    fileChooserLauncher.launch(params.createIntent());
+                    return true;
                 } catch (Exception e) {
-                    MainActivity.this.filePathCallback = null;
+                    filePathCallback = null;
                     return false;
                 }
-                return true;
             }
-        });
+        }));
 
-        binding.webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
-            try {
-                DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
-                request.setMimeType(mimeType);
-                String cookies = CookieManager.getInstance().getCookie(url);
-                request.addRequestHeader("cookie", cookies);
-                request.addRequestHeader("User-Agent", userAgent);
-                request.setDescription(getString(R.string.download_started, ""));
-                String fileName = URLUtil.guessFileName(url, contentDisposition, mimeType);
-                request.setTitle(fileName);
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, fileName);
-
-                DownloadManager dm = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                if (dm != null) {
-                    dm.enqueue(request);
-                    Toast.makeText(MainActivity.this, getString(R.string.download_started, fileName), Toast.LENGTH_SHORT).show();
-                }
-            } catch (Exception e) {
-                Toast.makeText(MainActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        binding.webView.setDownloadListener(new BrowserDownloadListener(this, new BrowserDownloadListener.DownloadCallback() {
+            @Override
+            public void onDownloadStarted(String fileName) {
+                Toast.makeText(MainActivity.this, getString(R.string.download_started, fileName), Toast.LENGTH_SHORT).show();
             }
-        });
+
+            @Override
+            public void onDownloadFailed(String message) {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        }));
     }
 
     // Thiết lập sự kiện người dùng cho các nút điều hướng và thanh nhập URL
@@ -235,13 +182,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        binding.btnHome.setOnClickListener(v -> loadUrlOrSearch(getString(R.string.default_homepage)));
+        binding.btnHome.setOnClickListener(v -> loadUrl(getString(R.string.default_homepage)));
 
         binding.editUrl.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_GO || actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
                 String input = binding.editUrl.getText().toString().trim();
-                loadUrlOrSearch(input);
-                hideKeyboard(binding.editUrl);
+                loadUrl(input);
+                UrlUtils.hideKeyboard(MainActivity.this, binding.editUrl);
                 binding.editUrl.clearFocus();
                 return true;
             }
@@ -254,7 +201,6 @@ public class MainActivity extends AppCompatActivity {
     // Thiết lập xử lý cử chỉ hoặc nút quay lại của hệ thống
     private void setupBackNavigation() {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            // Lùi trang trong lịch sử WebView nếu có hoặc thoát Activity
             @Override
             public void handleOnBackPressed() {
                 if (binding != null && binding.webView.canGoBack()) {
@@ -267,28 +213,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Điều hướng tới URL chỉ định hoặc tìm kiếm trên công cụ tìm kiếm
-    private void loadUrlOrSearch(String input) {
-        if (input == null || input.isEmpty()) {
-            return;
-        }
-
-        if (input.startsWith("http://") || input.startsWith("https://") || input.startsWith("file://") || input.startsWith("about:")) {
-            binding.webView.loadUrl(input);
-            return;
-        }
-
-        if (!input.contains(" ") && (Patterns.WEB_URL.matcher(input).matches() || input.contains("."))) {
-            binding.webView.loadUrl("https://" + input);
-            return;
-        }
-
-        try {
-            String encodedQuery = URLEncoder.encode(input, "UTF-8");
-            String searchUrl = String.format(getString(R.string.search_engine_url), encodedQuery);
-            binding.webView.loadUrl(searchUrl);
-        } catch (UnsupportedEncodingException e) {
-            binding.webView.loadUrl("https://www.google.com/search?q=" + input);
+    // Điều hướng WebView đến liên kết web hoặc truy vấn tìm kiếm
+    private void loadUrl(String input) {
+        String targetUrl = UrlUtils.formatUrlOrSearch(input, getString(R.string.search_engine_url));
+        if (!targetUrl.isEmpty()) {
+            binding.webView.loadUrl(targetUrl);
         }
     }
 
@@ -305,14 +234,6 @@ public class MainActivity extends AppCompatActivity {
 
         binding.btnForward.setEnabled(canGoForward);
         binding.btnForward.setAlpha(canGoForward ? 1.0f : 0.4f);
-    }
-
-    // Ẩn bàn phím ảo của hệ thống sau khi hoàn tất nhập liệu
-    private void hideKeyboard(View view) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
     }
 
     // Lưu trạng thái của WebView khi có thay đổi cấu hình

@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Wizk Bytes</string>
+    <string name="hint_search_or_url">Tìm kiếm hoặc nhập URL</string>
+    <string name="default_homepage">https://www.google.com</string>
+    <string name="search_engine_url">https://www.google.com/search?q=%s</string>
+    <string name="btn_back">Quay lại</string>
+    <string name="btn_forward">Tiến tới</string>
+    <string name="btn_refresh">Làm mới</string>
+    <string name="btn_stop">Dừng</string>
+    <string name="btn_home">Trang chủ</string>
+    <string name="download_started">Đang bắt đầu tải xuống: %s</string>
+    <string name="error_loading_page">Không thể kết nối đến trang web</string>
 </resources>

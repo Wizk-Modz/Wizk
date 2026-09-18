@@ -19,7 +19,7 @@ on:
 jobs:
   build:
     name: Build Release APK
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24
     outputs:
       short_sha: ${{ steps.set_sha.outputs.short_sha }}
     steps:

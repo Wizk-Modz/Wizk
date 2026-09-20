@@ -1,91 +1,64 @@
-# Quy Tắc Phát Triển — Implementation, Review & Fix
+# Quy Tắc Phát Triển
 
-Áp dụng cho mọi tác vụ: code, refactor, fix bug, config, dependency, DB, API, tài liệu. Task chỉ hoàn thành khi đã self-review kỹ và khắc phục toàn bộ lỗi phát hiện.
+Task chỉ hoàn thành khi đã self-review kỹ và khắc phục toàn bộ lỗi.
 
----
+## 1. Quy trình
+**PLAN → BRANCH → IMPLEMENT → SELF-REVIEW → FIX → VERIFY → REPORT**
+- Tạo branch trước khi thay đổi. Lặp *Find & Fix* đến khi sạch lỗi.
+- Không chỉ báo cáo lỗi mà không sửa. Không thay đổi ngoài scope task.
+- Lỗi không sửa được → rollback, thông báo lý do. Không để code nửa chừng.
+- Task quá lớn → đề xuất tách nhỏ. Dependency xung đột → báo cụ thể version.
 
-## 1. Quy trình bắt buộc
-**PLAN → IMPLEMENT → SELF-REVIEW → FIX ISSUES → VERIFY → REPORT**
-- Lặp lại vòng lặp *Find & Fix* cho đến khi sạch lỗi.
-- Tuyệt đối không dừng lại ở mức "chỉ báo cáo lỗi mà không sửa".
+## 2. Comment & Đặt tên
+- Mỗi hàm bắt buộc **1 dòng comment** ngay trên định nghĩa, mô tả ngắn gọn chức năng.
+- Dùng ký hiệu comment đúng ngôn ngữ (`#` Python/Ruby, `//` JS/TS/Java/Go/Rust/C/PHP, `--` SQL/Lua).
+- Đặt tên theo convention chuẩn của ngôn ngữ đang dùng (snake_case, camelCase, PascalCase tương ứng).
+- Tên rõ nghĩa, tránh viết tắt mơ hồ (trừ `i`, `ctx`, `err`, `req`, `res`, `db`, `tx`).
+- **Ưu tiên convention dự án hiện có** hơn convention mặc định.
 
----
+## 3. Cấu trúc & Dependency
+- Tạo file/thư mục theo cấu trúc chuẩn của ngôn ngữ. Dự án có sẵn cấu trúc → tuân theo, không tự ý tổ chức lại.
+- Không tự ý thêm/nâng cấp dependency. Ghi rõ version, tránh `latest`.
+- Lock file phải đồng bộ. Kiểm tra tương thích trước khi thêm dependency mới.
+- File > 300 dòng → cân nhắc tách module. Sửa một phần → dùng chỉnh sửa cục bộ.
 
-## 2. Comment hàm
-- Mọi hàm/phương thức bắt buộc có **duy nhất 1 dòng `#` comment** ngay trên định nghĩa.
-- Chỉ mô tả ngắn gọn hàm làm gì, không viết dài dòng hay giải thích hiển nhiên.
-- Ví dụ:
-```python
-# Gửi tin nhắn vào kênh chat
-def _reply(self, cid, tp, text):
-    ...
-```
+## 4. Review & Checklist
+- **Chức năng**: Logic, edge cases, null/exception, nhất quán trạng thái.
+- **Chất lượng**: Không dead code / unused import, đặt tên chuẩn.
+- **Bảo mật**: Validate input, không hardcode secrets, tránh leak tài nguyên.
+- **Build**: Syntax, import, typecheck/lint, tests pass.
+- **Tương thích**: Không phá vỡ API/interface hiện có.
 
----
+Checklist:
+- [ ] Build/lint/typecheck OK
+- [ ] Không broken import, không sót implementation
+- [ ] Không TODO/FIXME còn sót (trừ khi yêu cầu)
+- [ ] Tests pass, config hợp lệ
+- [ ] Không xoá/ghi đè file ngoài scope
+- [ ] Dependency không xung đột, lock file đồng bộ
 
-## 3. Tiêu chí Review bắt buộc
-Kiểm tra toàn diện các file thay đổi và liên quan:
-- **Chức năng**: Logic, điều kiện biên (edge cases), xử lý null/exception, tính nhất quán trạng thái.
-- **Chất lượng**: Code sạch, không dead code / unused import, đặt tên chuẩn, cấu trúc rõ ràng.
-- **Bảo mật & Hiệu năng**: Validate input, không hardcode credentials/secrets, tránh leak tài nguyên/memory leak.
-- **Build & Tích hợp**: Syntax chuẩn, import đúng, typecheck/lint pass, tests pass (nếu có).
+## 5. Build & Test
+- Chạy build/lint/test bằng tool đã cấu hình trong dự án — không tự thêm tool mới.
+- Dự án không có test/lint → ghi nhận trong báo cáo, không tự tạo trừ khi được yêu cầu.
 
----
-
-## 4. Checklist hoàn thành
-- [x] Syntax, lint, typecheck và build OK, không còn lỗi.
-- [x] Không broken imports, không sót implementation.
-- [x] Không để lại TODO/FIXME (trừ khi được yêu cầu).
-- [x] Không còn review finding chưa xử lý.
-- [x] Tests pass (nếu có) và config hợp lệ.
-
----
-
-## 5. Báo cáo cuối (bắt buộc)
-Mọi task kết thúc bằng format:
-
+## 6. Báo cáo cuối (bắt buộc)
 ```
 Review Summary
-
-Files Reviewed
-- ...
-
-Issues Found
-- N
-
-Issues Fixed
-- ...
-
-Validation Performed
-- ...
-
-Remaining Risks
-- None (hoặc liệt kê rủi ro còn lại)
+Changes Made: ...
+Files Reviewed: ...
+Issues Found: N
+Issues Fixed: ...
+Validation Performed: ...
+Remaining Risks: None
 ```
 
----
+## 7. Commit Message
+Tiền tố: `feat:` | `fix:` | `style:` | `refactor:` | `perf:` | `test:` | `docs:` | `ci:` | `chore:`
 
-## 6. Commit Message
-
-When you make changes to one or more files, you need to commit those changes with a commit message. Here are some guidelines:
-
-- Keep the commit message short and detailed.
-- Use one of these commit types as a prefix:
-  - `feat:` for a feature, possibly improving something already existing.
-  - `fix:` for a fix, such as a bug fix.
-  - `style:` for features and updates related to styling.
-  - `refactor:` for refactoring a specific section of the codebase.
-  - `test:` for everything related to testing.
-  - `docs:` for everything related to documentation.
-  - `chore:` for code maintenance (you can also use emojis to represent commit types).
-
-Examples:
-- `feat: Speed up compiling with new technique`
-- `fix: Fix crash during launch on certain phones`
-- `refactor: Reformat code in File.java`
-
-## 7. Quy tắc cốt lõi & Giao tiếp
-- **Không tự ý commit** khi chưa có yêu cầu rõ ràng từ người dùng.
-- **Tuyệt đối không commit secrets/credentials** (token, mật khẩu, API key, file nhạy cảm).
-- **Ngôn ngữ**: Trả lời bằng tiếng Việt trừ khi người dùng yêu cầu khác.
-- **Nguyên tắc**: Luôn self-review kỹ trước khi bàn giao; có lỗi là sửa triệt để ngay.
+## 8. Quy tắc cốt lõi
+- **Không tự ý commit** khi chưa được yêu cầu.
+- **Không xoá/ghi đè file** ngoài scope task.
+- **Tuyệt đối không commit secrets/credentials.**
+- **Ngôn ngữ**: Trả lời bằng tiếng Việt trừ khi yêu cầu khác.
+- **Không chắc chắn** → hỏi lại, không tự đoán.
+- Luôn self-review kỹ; có lỗi là sửa triệt để ngay.

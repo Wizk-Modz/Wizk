@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">Wizk Bytes</string>
+    <string name="hint_search_or_url">Tìm kiếm hoặc nhập URL</string>
+    <string name="default_homepage">https://www.google.com</string>
+    <string name="search_engine_url">https://www.google.com/search?q=%s</string>
+    <string name="btn_back">Quay lại</string>
+    <string name="btn_forward">Tiến tới</string>
+    <string name="btn_refresh">Làm mới</string>
+    <string name="btn_stop">Dừng</string>
+    <string name="btn_home">Trang chủ</string>
+    <string name="download_started">Đang bắt đầu tải xuống: %s</string>
+    <string name="error_loading_page">Không thể kết nối đến trang web</string>
+    <string name="download_dialog_title">Tải xuống</string>
+    <string name="download_dialog_message">%1$s\n%2$s</string>
+    <string name="download_option_builtin">Tải nhanh đa luồng</string>
+    <string name="download_option_system">Trình tải xuống hệ thống</string>
+    <string name="download_dialog_cancel">Hủy</string>
+    <string name="download_failed">Không thể bắt đầu tải xuống</string>
+    <string name="download_unknown_size">Không xác định dung lượng</string>
+    <string name="download_notification_service_title">Trình quản lý tải xuống</string>
+    <string name="download_notification_service_text">Dịch vụ tải xuống đang chạy</string>
+    <string name="download_notification_paused">Đã tạm dừng (%1$d%%)</string>
+    <string name="download_notification_progress">%1$d%% · %2$s/%3$s · %4$s/s</string>
+    <string name="download_notification_complete">Tải xuống hoàn tất (%1$s)</string>
+    <string name="download_notification_failed">Tải xuống thất bại</string>
+    <string name="download_action_pause">Tạm dừng</string>
+    <string name="download_action_resume">Tiếp tục</string>
 </resources>

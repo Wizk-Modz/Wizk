@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
+    <queries>
+        <package android:name="com.dv.adm.pay" />
+        <package android:name="com.dv.adm" />
+        <package android:name="idm.internet.download.manager.plus" />
+        <package android:name="idm.internet.download.manager" />
+        <package android:name="idm.internet.download.manager.adm.lite" />
+        <package android:name="org.freedownloadmanager.fdm" />
+        <package android:name="com.dv.get" />
+        <package android:name="com.tachibana.downloader" />
+        <package android:name="com.gianlu.aria2app" />
+        <package android:name="com.gopeed" />
+        <package android:name="com.gopeed.gopeed" />
+        <package android:name="com.abdownloadmanager" />
+        <package android:name="com.fluxdown.app" />
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -16,6 +33,15 @@
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
+        <service
+            android:name=".download.service.DownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <receiver
+            android:name=".download.service.DownloadReceiver"
+            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"

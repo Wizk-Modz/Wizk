@@ -22,6 +22,7 @@ public class PermissionHelper {
 
     private final Map<String, Boolean> results = new HashMap<>();
 
+    // Khởi tạo trình quản lý quyền và đăng ký bộ xử lý kết quả
     public PermissionHelper(Activity activity) {
         this.activity = activity;
 
@@ -47,6 +48,7 @@ public class PermissionHelper {
                 );
     }
 
+    // Yêu cầu cấp quyền hoặc trả kết quả ngay nếu đã được cấp
     public void request(int requestCode, @NonNull String... permissions) {
 
         this.requestCode = requestCode;
@@ -73,10 +75,12 @@ public class PermissionHelper {
         launcher.launch(permissions);
     }
 
+    // Xử lý kết quả cấp quyền từ hệ thống
     protected void onResult(int requestCode, boolean allGranted) {
         // Override nếu cần xử lý kết quả
     }
 
+    // Kiểm tra xem một quyền cụ thể đã được cấp hay chưa
     public boolean isGranted(String permission) {
         return ContextCompat.checkSelfPermission(
                 activity,

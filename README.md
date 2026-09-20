@@ -22,7 +22,11 @@
   - Tự động kích hoạt/vô hiệu hóa nút bấm theo lịch sử duyệt web thực tế.
   - Tích hợp `OnBackPressedDispatcher` để lùi trang lịch sử trước khi thoát ứng dụng.
 - 📊 **Thanh tiến trình Material 3**: `LinearProgressIndicator` hiển thị tiến độ tải trang từ 0 - 100% mượt mà và tự động ẩn khi hoàn tất.
-- 📥 **Quản lý tải xuống an toàn**: Tích hợp với `DownloadManager` của Android, tự động xử lý cookie, tiêu đề tệp và thông báo tiến trình tải.
+- 📥 **Quản lý tải xuống linh hoạt**:
+  - Bộ tải tích hợp đa luồng dùng HTTP Range, hỗ trợ tạm dừng/tiếp tục trong phiên chạy, theo dõi tiến độ và tốc độ qua Foreground Service Notification.
+  - Tùy chọn tải bằng Android `DownloadManager` để lưu vào thư mục `Downloads` công khai của thiết bị.
+  - Phát hiện và chuyển liên kết tải đến ứng dụng đã cài như ADM, 1DM, FDM, Gopeed, Download Navi, Aria2App và AB DM.
+  - Bộ tải tích hợp lưu tệp tại thư mục riêng `Android/data/com.wizk.app/files/Download/`, tương thích Scoped Storage trên Android 11 trở lên.
 - 📤 **Hỗ trợ tải tệp lên**: Tích hợp `WebChromeClient.onShowFileChooser` với hệ thống `ActivityResultLauncher` để người dùng dễ dàng tải ảnh/tệp lên trang web.
 - 🔄 **Giữ nguyên trạng thái (State Preservation)**: Cấu hình `configChanges` chống reload trang khi xoay màn hình và phục hồi lịch sử duyệt web qua `saveState`/`restoreState`.
 
@@ -40,7 +44,12 @@ app/src/main/java/com/wizk/app/
 │   ├── BrowserWebViewClient.java     # Xử lý điều hướng trang, scheme intent (tel:, mailto:), trang lỗi
 │   └── BrowserWebChromeClient.java   # Xử lý thanh tiến trình và sự kiện chọn tệp tải lên
 ├── download/
-│   └── BrowserDownloadListener.java  # Tải tệp ngầm an toàn qua Android DownloadManager
+│   ├── BrowserDownloadListener.java  # Thu thập download request từ WebView
+│   ├── model/                        # DownloadTask, Chunk, DownloadRequest, DownloadStatus
+│   ├── engine/                       # HTTP Range, tải đa luồng và tiện ích tệp
+│   ├── service/                      # Foreground Service, Notification và Pause/Resume
+│   ├── custom/                       # Điều hướng sang ADM, 1DM, FDM, Gopeed...
+│   └── ui/                           # Hộp thoại chọn phương thức tải
 └── util/
     └── UrlUtils.java                 # Tiện ích kiểm tra URL, định dạng tìm kiếm và ẩn bàn phím ảo
 ```

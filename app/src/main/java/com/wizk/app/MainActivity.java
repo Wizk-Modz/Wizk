@@ -93,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 
         binding.webView.setWebViewClient(new BrowserWebViewClient(this, new BrowserWebViewClient.BrowserWebCallback() {
+            // Cập nhật giao diện khi trang web bắt đầu tải
             @Override
             public void onPageStarted(String url) {
                 isLoading = true;
@@ -105,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
                 updateNavButtons();
             }
 
+            // Cập nhật giao diện khi trang web đã tải xong
             @Override
             public void onPageFinished(String url) {
                 isLoading = false;
@@ -117,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
                 updateNavButtons();
             }
 
+            // Hiển thị thông báo lỗi khi trang web tải thất bại
             @Override
             public void onPageError(String failingUrl) {
                 binding.progressIndicator.setVisibility(View.GONE);
@@ -125,12 +128,14 @@ public class MainActivity extends AppCompatActivity {
         }));
 
         binding.webView.setWebChromeClient(new BrowserWebChromeClient(new BrowserWebChromeClient.BrowserChromeCallback() {
+            // Cập nhật thanh tiến độ khi phần trăm tải trang thay đổi
             @Override
             public void onProgressChanged(int newProgress) {
                 binding.progressIndicator.setProgressCompat(newProgress, true);
                 binding.progressIndicator.setVisibility(newProgress >= 100 ? View.GONE : View.VISIBLE);
             }
 
+            // Mở trình chọn tệp khi trang web yêu cầu tải lên tệp
             @Override
             public boolean onShowFileChooser(ValueCallback<Uri[]> callback, BrowserWebChromeClient.FileChooserParams params) {
                 if (filePathCallback != null) {
@@ -147,17 +152,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }));
 
-        binding.webView.setDownloadListener(new BrowserDownloadListener(this, new BrowserDownloadListener.DownloadCallback() {
-            @Override
-            public void onDownloadStarted(String fileName) {
-                Toast.makeText(MainActivity.this, getString(R.string.download_started, fileName), Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onDownloadFailed(String message) {
-                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
-            }
-        }));
+        binding.webView.setDownloadListener(new BrowserDownloadListener(this, binding.webView));
     }
 
     // Thiết lập sự kiện người dùng cho các nút điều hướng và thanh nhập URL
@@ -201,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
     // Thiết lập xử lý cử chỉ hoặc nút quay lại của hệ thống
     private void setupBackNavigation() {
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            // Quay lại trang trước hoặc thoát ứng dụng khi nhấn nút Back
             @Override
             public void handleOnBackPressed() {
                 if (binding != null && binding.webView.canGoBack()) {

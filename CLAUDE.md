@@ -62,3 +62,4 @@ Tiền tố: `feat:` | `fix:` | `style:` | `refactor:` | `perf:` | `test:` | `do
 - **Ngôn ngữ**: Trả lời bằng tiếng Việt trừ khi yêu cầu khác.
 - **Không chắc chắn** → hỏi lại, không tự đoán.
 - Luôn self-review kỹ; có lỗi là sửa triệt để ngay.
+- **Code phải hoạt động đúng chức năng, không chỉ compile được.** Luôn kiểm chứng logic, chạy thử hoặc trace qua flow để đảm bảo kết quả đúng — không chỉ dừng ở build/lint pass.
